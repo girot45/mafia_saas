@@ -1,3 +1,8 @@
+from datetime import datetime
+
+from database.manager import moscow_tz
+
+
 def improve_data_output_view(data):
     out = []
     for game, user_count, max_players in data:
@@ -8,3 +13,13 @@ def improve_data_output_view(data):
         out.append(raw)
 
     return out
+
+
+async def create_log(user_id: int, action: str, error: str = None):
+    now = datetime.now(moscow_tz)
+    formatted_date = now.strftime('%Y-%m-%d %H:%M')
+    log_message = f"{formatted_date} user: ({user_id}) act: {action}"
+    if error:
+        log_message += f" err: {error}"
+    with open('log.txt', 'a') as log_file:
+        log_file.write(log_message + '\n')

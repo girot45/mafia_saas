@@ -1,10 +1,8 @@
-from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, Session
-from aiomysql.sa import create_engine
+from sqlalchemy.orm import sessionmaker
+
 import pytz
 
-from database.database import Base
 
 host = "92.53.115.237"
 user = "gen_user"
@@ -24,7 +22,6 @@ class Database:
         async_session = sessionmaker(bind=self.engine, class_=AsyncSession)
         async with async_session() as session:
             yield session
-
 
 
 session = Database(DATABASE_URL)

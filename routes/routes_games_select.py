@@ -9,13 +9,14 @@ from database.manager import session
 
 router = APIRouter()
 
-@router.get("/games_on_week_by_type")
+@router.post("/games_on_week_by_type")
 async def games_on_week_by_type(
+        user_id: int,
         type: str,
         session: AsyncSession = Depends(session.get_session)
 ):
     start_time = time.time()
-    res = await get_games_on_week_by_type(type, session)
+    res = await get_games_on_week_by_type(user_id, type, session)
 
     res_dict = form_dict_for_messages(res)
     end_time = time.time()
@@ -31,12 +32,13 @@ async def games_on_week_by_type(
     })
 
 
-@router.get("/current_games")
+@router.post("/current_games")
 async def current_games(
+        user_id: int,
         session: AsyncSession = Depends(session.get_session)
 ):
     start_time = time.time()
-    res = await get_current_games(session)
+    res = await get_current_games(user_id, session)
 
     res_dict = form_dict_for_messages(res)
     end_time = time.time()
@@ -52,7 +54,7 @@ async def current_games(
     })
 
 
-@router.get("/games_by_user")
+@router.post("/games_by_user")
 async def games_by_user(
         user_id: int,
         session: AsyncSession = Depends(session.get_session)
