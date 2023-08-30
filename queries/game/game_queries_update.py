@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 
 from database.database import Game
 from database.database_models import Game as Game_model
-from models.game_models import Game_update
+from models.models import Game_update
 
 
 async def update_game_field(
@@ -32,8 +32,6 @@ async def update_game_field(
         return False
 
 
-
-
 async def insert_game(game: Game_model, session: AsyncSession):
     try:
         new_game = Game(
@@ -45,11 +43,11 @@ async def insert_game(game: Game_model, session: AsyncSession):
             cost=game.cost,
             game_descr=game.game_descr,
             game_banner=game.game_banner,
+            presenter=game.presenter
         )
         session.add(new_game)
         await session.commit()
         return True
     except SQLAlchemyError as e:
-        print(421)
         await session.rollback()
         return False

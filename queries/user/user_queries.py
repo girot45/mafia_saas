@@ -1,7 +1,9 @@
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.database import User_game, User, Marks
 from sqlalchemy import select, func
+
+from queries.utils import create_log
 
 
 async def insert_user_game(
@@ -13,6 +15,7 @@ async def insert_user_game(
                                   user_id=user_game.user_id)
         session.add(new_user_game)
         await session.commit()
+        return True
     except SQLAlchemyError:
         await session.rollback()
         return False
@@ -44,10 +47,12 @@ async def insert_user(user: User, session: AsyncSession):
 
 
 async def get_users_by_game(
+        user_id: int,
         game_id: int,
         session: AsyncSession
 ):
     try:
+        await create_log(user_id, 'get_users_by_game')
         async with session.begin():
             stmt = (
                 select(User)
@@ -57,18 +62,15 @@ async def get_users_by_game(
             result = await session.execute(stmt)
 
             players = result.scalars().all()
-            users = [{
-                "userame": user.username,
-                "user_fio": user.user_fio,
-                "user_photo": user.user_photo,
-                "user_scores": user.scores,
-                "user_balance": user.balance,
+            users_photos = [user.user_photo for user in players]
+            users_info = [f"{user.username} - {user.scores}" for user
+                          in players]
 
-            } for user in players]
-
-            return users
-    except SQLAlchemyError:
+            return users_photos, users_info
+    except (PendingRollbackError, SQLAlchemyError, ConnectionError,
+            ValueError, KeyError, AttributeError, TypeError) as e:
         await session.rollback()
+        await create_log(user_id, 'get_users_by_game', error=str(e))
         return False
 
 
@@ -82,12 +84,16 @@ async def get_user_profile(user_id: int, session: AsyncSession):
             result = await session.execute(stmt)
             user_profile = result.scalars().first()
             if user_profile:
-                return {"userame": user_profile.username,
+                return {
+                    "user_profile": {
+                        "userame": user_profile.username,
                         "user_fio": user_profile.user_fio,
                         "user_photo": user_profile.user_photo,
                         "user_scores": user_profile.scores,
-                        "user_balance": user_profile.balance,
-                        "status": True}
+                        "user_balance": user_profile.balance
+                    },
+                    "status": True
+                }
     except SQLAlchemyError:
         await session.rollback()
         return {"user_profile": None, "status": False}

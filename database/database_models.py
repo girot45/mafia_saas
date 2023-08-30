@@ -24,6 +24,7 @@ class Game(BaseModel):
     cost: int
     game_descr: str
     game_banner: str
+    presenter: str
 
 class Marks(BaseModel):
     user_id: int
@@ -38,3 +39,5 @@ class Types(BaseModel):
     type: str
     max_players: int
     min_players: int
+
+

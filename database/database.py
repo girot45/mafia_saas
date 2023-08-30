@@ -27,6 +27,7 @@ class Game(Base):
     cost = Column(Integer)
     game_descr = Column(Text)
     game_banner = Column(Text)
+    presenter = Column(String(length=255))
 
 class User(Base):
     __tablename__ = "user"

@@ -6,7 +6,7 @@ from sqlalchemy.exc import PendingRollbackError, SQLAlchemyError
 
 from database.database import Game, User_game, Types
 from database.manager import moscow_tz
-from database.utils import improve_data_output_view, create_log
+from queries.utils import improve_data_output_view, create_log
 
 
 async def get_games_on_week_by_type(user_id: int, game_type: str,
